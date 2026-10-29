@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Tracking Pengiriman - SITTA UT</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <nav class="navbar">
+        <h3>SITTA UT</h3>
+        <div>
+            <a href="dashboard.html">Dashboard</a>
+            <a href="stok.html">Informasi Bahan Ajar</a>
+            <a href="tracking.html">Tracking Pengiriman</a>
+            <a href="index.html">Keluar</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="card">
+            <h2>Tracking Pengiriman</h2>
+            <div class="form-group" style="display: flex; gap: 10px;">
+                <input type="text" id="nomorDO" placeholder="Masukkan Nomor Delivery Order (contoh: 2023001234)">
+                <button onclick="cariTracking()">Cari</button>
+            </div>
+        </div>
+
+        <div id="trackingResult" class="card" style="display: none;">
+            <h3 id="namaMahasiswa"></h3>
+            <p><strong>Status Pengiriman:</strong> <span id="statusPengiriman"></span></p>
+            <p><strong>Ekspedisi:</strong> <span id="ekspedisi"></span></p>
+            <p><strong>Tanggal Kirim:</strong> <span id="tanggalKirim"></span></p>
+            <p><strong>Jenis Paket:</strong> <span id="jenisPaket"></span></p>
+            <p><strong>Total Pembayaran:</strong> <span id="totalPembayaran"></span></p>
+
+            <h4 style="margin-top: 15px;">Riwayat Perjalanan Paket:</h4>
+            <ul id="riwayatPerjalanan" style="margin-left: 20px; margin-top: 10px;"></ul>
+        </div>
+    </div>
+
+    <script src="js/data.js"></script>
+    <script src="js/script.js"></script>
+</body>
+
+</html>

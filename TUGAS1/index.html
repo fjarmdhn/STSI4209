@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Login - SITTA UT</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <div class="container" style="max-width: 400px; margin-top: 80px;">
+        <div class="card">
+            <h2>Selamat Datang di SITTA</h2>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="email" required>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="password" required>
+                </div>
+                <button type="submit" style="width: 100%;">Masuk</button>
+            </form>
+            <div style="margin-top: 15px; font-size: 14px;">
+                <a href="#" onclick="openModal('lupaModal')">Lupa Password?</a> |
+                <a href="#" onclick="openModal('daftarModal')">Daftar</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Lupa Password -->
+    <div id="lupaModal" class="modal">
+        <div class="modal-content">
+            <h3>Lupa Password</h3>
+            <p>Silakan hubungi administrator layanan UT-Daerah.</p>
+            <button onclick="closeModal('lupaModal')">Tutup</button>
+        </div>
+    </div>
+
+    <!-- Modal Daftar -->
+    <div id="daftarModal" class="modal">
+        <div class="modal-content">
+            <h3>Daftar Akun</h3>
+            <p>Pendaftaran akun dilakukan melalui sistem terpadu UT Pusat.</p>
+            <button onclick="closeModal('daftarModal')">Tutup</button>
+        </div>
+    </div>
+
+    <script src="js/data.js"></script>
+    <script src="js/script.js"></script>
+</body>
+
+</html>

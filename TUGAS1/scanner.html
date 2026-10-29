@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IDX Pro Stock Screener - Institutional Grade</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        darkbg: '#0f172a',
+                        cardbg: '#1e293b',
+                        bordercolor: '#334155',
+                        accentgreen: '#10b981',
+                        accentred: '#ef4444',
+                        accentgold: '#f59e0b',
+                        accentblue: '#3b82f6'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body class="bg-darkbg text-slate-100 font-sans min-h-screen p-4 md:p-6">
+
+    <!-- Header -->
+    <header
+        class="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-bordercolor">
+        <div>
+            <div class="flex items-center gap-2">
+                <span
+                    class="bg-accentblue/20 text-accentblue px-2.5 py-0.5 rounded text-xs font-bold uppercase tracking-wider">Institutional
+                    Grade</span>
+                <span
+                    class="bg-accentgreen/20 text-accentgreen px-2.5 py-0.5 rounded text-xs font-bold uppercase tracking-wider">BEI
+                    / IDX Market</span>
+            </div>
+            <h1 class="text-2xl md:text-3xl font-extrabold mt-1 text-white flex items-center gap-2">
+                <i class="fa-solid me-2 fa-chart-line text-accentgreen"></i> IDX Pro Stock Screener
+            </h1>
+            <p class="text-slate-400 text-sm mt-0.5">Filtering 4-Layer: Likuiditas + Bandarmologi (Broksum) + Price
+                Action + Dynamic ATR Risk Management</p>
+        </div>
+        <div class="flex items-center gap-3">
+            <button onclick="resetFilters()"
+                class="bg-slate-700 hover:bg-slate-600 text-xs px-3 py-2 rounded-lg font-semibold transition">
+                <i class="fa-solid fa-rotate-left mr-1"></i> Reset Filter
+            </button>
+            <div class="bg-cardbg border border-bordercolor px-4 py-2 rounded-lg text-right">
+                <div class="text-xs text-slate-400">Total Saham Lolos</div>
+                <div id="passedCount" class="text-xl font-bold text-accentgreen">0 / 0</div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Filter & Strategy Bar -->
+    <section class="bg-cardbg border border-bordercolor rounded-xl p-4 mb-6 shadow-lg">
+        <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Preset Strategi Pro</div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
+            <button onclick="applyPreset('breakout')" id="btn-breakout"
+                class="preset-btn bg-slate-800 hover:bg-slate-700 border border-bordercolor p-3 rounded-lg text-left transition flex items-center justify-between">
+                <div>
+                    <div class="font-bold text-sm text-white flex items-center gap-2">
+                        <i class="fa-solid fa-bolt text-accentgold"></i> Institutional Breakout
+                    </div>
+                    <div class="text-xs text-slate-400 mt-1">Volume Spike >200% + Top 3 Broker Accumulation</div>
+                </div>
+            </button>
+
+            <button onclick="applyPreset('pullback')" id="btn-pullback"
+                class="preset-btn bg-slate-800 hover:bg-slate-700 border border-bordercolor p-3 rounded-lg text-left transition flex items-center justify-between">
+                <div>
+                    <div class="font-bold text-sm text-white flex items-center gap-2">
+                        <i class="fa-solid fa-bullseye text-accentblue"></i> Smart Money Pullback
+                    </div>
+                    <div class="text-xs text-slate-400 mt-1">Retest MA20 Support + Bandar Tetap Akumulasi</div>
+                </div>
+            </button>
+
+            <button onclick="applyPreset('foreign')" id="btn-foreign"
+                class="preset-btn bg-slate-800 hover:bg-slate-700 border border-bordercolor p-3 rounded-lg text-left transition flex items-center justify-between">
+                <div>
+                    <div class="font-bold text-sm text-white flex items-center gap-2">
+                        <i class="fa-solid fa-ship text-accentgreen"></i> Foreign Accumulation
+                    </div>
+                    <div class="text-xs text-slate-400 mt-1">Net Foreign Buy 3D Consistently + Turnover >20M</div>
+                </div>
+            </button>
+        </div>
+
+        <!-- Quick Filters -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 pt-3 border-t border-bordercolor text-xs">
+            <div>
+                <label class="block text-slate-400 mb-1">Min. Turnover Harian</label>
+                <select id="filterTurnover" onchange="filterData()"
+                    class="w-full bg-slate-800 border border-bordercolor rounded p-2 text-slate-200">
+                    <option value="10">>= Rp 10 Miliar</option>
+                    <option value="20" selected>>= Rp 20 Miliar</option>
+                    <option value="50">>= Rp 50 Miliar</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-slate-400 mb-1">Bandarmologi (Broksum)</label>
+                <select id="filterBroksum" onchange="filterData()"
+                    class="w-full bg-slate-800 border border-bordercolor rounded p-2 text-slate-200">
+                    <option value="all">Semua Kondisi</option>
+                    <option value="strong_acc" selected>Big Accumulation Only</option>
+                    <option value="retail_dump">Retail Dumping Only</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-slate-400 mb-1">Filter Keamanan (FCA/Notasi)</label>
+                <select id="filterSafety" onchange="filterData()"
+                    class="w-full bg-slate-800 border border-bordercolor rounded p-2 text-slate-200">
+                    <option value="clean" selected>Strict Clean (Non-FCA & No Notation)</option>
+                    <option value="all">Tampilkan Semua (Termasuk Risky)</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-slate-400 mb-1">Cari Ticker / Saham</label>
+                <input type="text" id="filterSearch" onkeyup="filterData()" placeholder="Misal: PGAS, MEDC..."
+                    class="w-full bg-slate-800 border border-bordercolor rounded p-2 text-slate-200 uppercase">
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Screener Table -->
+    <main class="bg-cardbg border border-bordercolor rounded-xl overflow-hidden shadow-lg">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-xs md:text-sm">
+                <thead>
+                    <tr
+                        class="bg-slate-800/80 text-slate-400 border-b border-bordercolor uppercase text-[11px] tracking-wider">
+                        <th class="p-3">Saham</th>
+                        <th class="p-3">Harga & Chg</th>
+                        <th class="p-3">Broksum Status</th>
+                        <th class="p-3">Vol Spike</th>
+                        <th class="p-3">Foreign (3D)</th>
+                        <th class="p-3">Entry Zone</th>
+                        <th class="p-3">Stop Loss (ATR)</th>
+                        <th class="p-3">Target Price</th>
+                        <th class="p-3">RRR</th>
+                        <th class="p-3 text-center">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="screenerTable" class="divide-y divide-bordercolor">
+                    <!-- Data diisi oleh JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <!-- Modal Detail & Position Sizer -->
+    <div id="detailModal"
+        class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
+        <div class="bg-cardbg border border-bordercolor rounded-xl max-w-lg w-full p-6 shadow-2xl relative">
+            <button onclick="closeModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-xl">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div id="modalContent"></div>
+        </div>
+    </div>
+
+    <script>
+        // Sample Data Saham Realistis IHSG
+        const stocksData = [
+            { ticker: 'PGAS', name: 'Perusahaan Gas Negara', price: 1560, chg: 3.65, turnover: 45.2, broksum: 'Big Accumulation', top3Ratio: 62.4, retailDump: true, volSpike: 245, foreign3D: 12.8, support: 1510, atr: 35, setup: 'BREAKOUT', fca: false, notation: false },
+            { ticker: 'MEDC', name: 'Medco Energi Internasional', price: 1320, chg: 2.33, turnover: 38.5, broksum: 'Big Accumulation', top3Ratio: 58.1, retailDump: true, volSpike: 210, foreign3D: 8.5, support: 1285, atr: 28, setup: 'PULLBACK', fca: false, notation: false },
+            { ticker: 'ANTM', name: 'Aneka Tambang Tbk', price: 1450, chg: -0.68, turnover: 28.0, broksum: 'Moderate Acc', top3Ratio: 48.0, retailDump: false, volSpike: 110, foreign3D: -2.1, support: 1420, atr: 30, setup: 'PULLBACK', fca: false, notation: false },
+            { ticker: 'BBCA', name: 'Bank Central Asia Tbk', price: 10250, chg: 1.23, turnover: 120.5, broksum: 'Big Accumulation', top3Ratio: 65.0, retailDump: true, volSpike: 180, foreign3D: 145.0, support: 10100, atr: 150, setup: 'FOREIGN', fca: false, notation: false },
+            { ticker: 'TLKM', name: 'Telkom Indonesia Tbk', price: 3050, chg: 0.00, turnover: 65.0, broksum: 'Distribution', top3Ratio: 28.0, retailDump: false, volSpike: 85, foreign3D: -18.5, support: 3000, atr: 55, setup: 'NONE', fca: false, notation: false },
+            { ticker: 'ENRG', name: 'Energi Mega Persada Tbk', price: 230, chg: 5.45, turnover: 22.1, broksum: 'Big Accumulation', top3Ratio: 71.2, retailDump: true, volSpike: 310, foreign3D: 4.2, support: 218, atr: 8, setup: 'BREAKOUT', fca: false, notation: false },
+            { ticker: 'GOTO', name: 'GoTo Gojek Tokopedia', price: 62, chg: 1.64, turnover: 18.2, broksum: 'Distribution', top3Ratio: 32.0, retailDump: false, volSpike: 120, foreign3D: -5.0, support: 60, atr: 2, setup: 'NONE', fca: true, notation: true }
+        ];
+
+        let currentPreset = 'all';
+
+        function calculateTradeLevels(stock) {
+            const entry = stock.price;
+            const stopLoss = Math.round(entry - (1.5 * stock.atr));
+            const tp1 = Math.round(entry + (3.0 * stock.atr));
+            const risk = entry - stopLoss;
+            const reward = tp1 - entry;
+            const rrr = (reward / risk).toFixed(2);
+            return { entry, stopLoss, tp1, rrr };
+        }
+
+        function renderTable(data) {
+            const tbody = document.getElementById('screenerTable');
+            tbody.innerHTML = '';
+
+            if (data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="10" class="p-8 text-center text-slate-500">Tidak ada saham yang memenuhi kriteria filter saat ini.</td></tr>`;
+                return;
+            }
+
+            data.forEach(stock => {
+                const { entry, stopLoss, tp1, rrr } = calculateTradeLevels(stock);
+
+                const chgColor = stock.chg >= 0 ? 'text-accentgreen' : 'text-accentred';
+                const chgSign = stock.chg >= 0 ? '+' : '';
+
+                let broksumBadge = stock.broksum === 'Big Accumulation'
+                    ? '<span class="bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded font-bold text-[11px]">Top Acc</span>'
+                    : '<span class="bg-slate-700 text-slate-400 px-2 py-0.5 rounded text-[11px]">Neutral</span>';
+
+                if (stock.retailDump) {
+                    broksumBadge += ' <span class="bg-blue-500/20 text-blue-400 px-1.5 py-0.5 rounded text-[10px]" title="Ritel Jualan ke Bandar">Retail Dump</span>';
+                }
+
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-800/50 transition';
+                tr.innerHTML = `
+          <td class="p-3">
+            <div class="font-extrabold text-white text-base">${stock.ticker}</div>
+            <div class="text-[11px] text-slate-400 truncate max-w-[120px]">${stock.name}</div>
+          </td>
+          <td class="p-3">
+            <div class="font-bold text-white">Rp ${stock.price.toLocaleString()}</div>
+            <div class="text-xs ${chgColor} font-semibold">${chgSign}${stock.chg}%</div>
+          </td>
+          <td class="p-3">${broksumBadge}</td>
+          <td class="p-3">
+            <span class="font-bold ${stock.volSpike >= 200 ? 'text-accentgold' : 'text-slate-300'}">${stock.volSpike}%</span>
+            <div class="text-[10px] text-slate-500">vs MA20 Vol</div>
+          </td>
+          <td class="p-3">
+            <span class="font-semibold ${stock.foreign3D > 0 ? 'text-accentgreen' : 'text-slate-400'}">
+              ${stock.foreign3D > 0 ? '+' : ''}${stock.foreign3D} M
+            </span>
+          </td>
+          <td class="p-3 font-semibold text-white">Rp ${entry.toLocaleString()}</td>
+          <td class="p-3 text-accentred font-semibold">Rp ${stopLoss.toLocaleString()}</td>
+          <td class="p-3 text-accentgreen font-semibold">Rp ${tp1.toLocaleString()}</td>
+          <td class="p-3 font-bold text-accentgold">1 : ${rrr}</td>
+          <td class="p-3 text-center">
+            <button onclick="openModal('${stock.ticker}')" class="bg-accentblue/20 hover:bg-accentblue/40 text-accentblue px-3 py-1 rounded text-xs font-bold transition">
+              Detail & Sizer
+            </button>
+          </td>
+        `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function filterData() {
+            const minTurnover = parseFloat(document.getElementById('filterTurnover').value);
+            const broksum = document.getElementById('filterBroksum').value;
+            const safety = document.getElementById('filterSafety').value;
+            const search = document.getElementById('filterSearch').value.toUpperCase();
+
+            let filtered = stocksData.filter(stock => {
+                if (stock.turnover < minTurnover) return false;
+                if (safety === 'clean' && (stock.fca || stock.notation)) return false;
+                if (broksum === 'strong_acc' && stock.broksum !== 'Big Accumulation') return false;
+                if (broksum === 'retail_dump' && !stock.retailDump) return false;
+                if (search && !stock.ticker.includes(search)) return false;
+
+                if (currentPreset === 'breakout' && (stock.volSpike < 200 || stock.broksum !== 'Big Accumulation')) return false;
+                if (currentPreset === 'pullback' && stock.setup !== 'PULLBACK') return false;
+                if (currentPreset === 'foreign' && (stock.foreign3D <= 5 || stock.turnover < 20)) return false;
+
+                return true;
+            });
+
+            document.getElementById('passedCount').innerText = `${filtered.length} / ${stocksData.length}`;
+            renderTable(filtered);
+        }
+
+        function applyPreset(preset) {
+            currentPreset = preset;
+            document.querySelectorAll('.preset-btn').forEach(btn => btn.classList.remove('border-accentblue', 'bg-slate-700'));
+            document.getElementById(`btn-${preset}`).classList.add('border-accentblue', 'bg-slate-700');
+            filterData();
+        }
+
+        function resetFilters() {
+            currentPreset = 'all';
+            document.querySelectorAll('.preset-btn').forEach(btn => btn.classList.remove('border-accentblue', 'bg-slate-700'));
+            document.getElementById('filterTurnover').value = '10';
+            document.getElementById('filterBroksum').value = 'all';
+            document.getElementById('filterSafety').value = 'clean';
+            document.getElementById('filterSearch').value = '';
+            filterData();
+        }
+
+        function openModal(ticker) {
+            const stock = stocksData.find(s => s.ticker === ticker);
+            const { entry, stopLoss, tp1, rrr } = calculateTradeLevels(stock);
+
+            const modalContent = document.getElementById('modalContent');
+            modalContent.innerHTML = `
+        <div class="mb-4">
+          <span class="bg-accentblue/20 text-accentblue px-2 py-0.5 rounded text-xs font-bold">${stock.ticker}</span>
+          <h2 class="text-xl font-extrabold text-white mt-1">${stock.name}</h2>
+          <p class="text-xs text-slate-400">Analisis Broksum & Position Size Sizer</p>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3 bg-slate-800 p-3 rounded-lg mb-4 text-xs">
+          <div><span class="text-slate-400">Top 3 Acc Ratio:</span> <strong class="text-accentgreen">${stock.top3Ratio}%</strong></div>
+          <div><span class="text-slate-400">Vol Spike:</span> <strong class="text-accentgold">${stock.volSpike}%</strong></div>
+          <div><span class="text-slate-400">Foreign Flow 3D:</span> <strong class="text-white">${stock.foreign3D} M</strong></div>
+          <div><span class="text-slate-400">ATR Volatilitas:</span> <strong class="text-white">Rp ${stock.atr}</strong></div>
+        </div>
+
+        <!-- Position Sizing Calculator -->
+        <div class="border-t border-bordercolor pt-4">
+          <h3 class="text-sm font-bold text-white mb-2 flex items-center gap-1">
+            <i class="fa-solid fa-calculator text-accentblue"></i> Kalkulator Risk & Lot Size
+          </h3>
+          <div class="grid grid-cols-2 gap-3 mb-3 text-xs">
+            <div>
+              <label class="block text-slate-400 mb-1">Total Modal (Rp)</label>
+              <input type="number" id="calcCapital" value="50000000" onchange="calculateLot('${stock.ticker}')" class="w-full bg-slate-900 border border-bordercolor rounded p-1.5 text-white">
+            </div>
+            <div>
+              <label class="block text-slate-400 mb-1">Risk per Trade (%)</label>
+              <input type="number" id="calcRisk" value="1" step="0.5" onchange="calculateLot('${stock.ticker}')" class="w-full bg-slate-900 border border-bordercolor rounded p-1.5 text-white">
+            </div>
+          </div>
+
+          <div id="lotResult" class="bg-accentblue/10 border border-accentblue/30 p-3 rounded-lg text-center">
+            <!-- Hasil diisi JS -->
+          </div>
+        </div>
+      `;
+
+            document.getElementById('detailModal').classList.remove('hidden');
+            calculateLot(ticker);
+        }
+
+        function calculateLot(ticker) {
+            const stock = stocksData.find(s => s.ticker === ticker);
+            const { entry, stopLoss } = calculateTradeLevels(stock);
+
+            const capital = parseFloat(document.getElementById('calcCapital').value) || 0;
+            const riskPercent = parseFloat(document.getElementById('calcRisk').value) || 1;
+
+            const maxRiskRupiah = capital * (riskPercent / 100);
+            const riskPerShare = entry - stopLoss;
+
+            const maxShares = Math.floor(maxRiskRupiah / riskPerShare);
+            const maxLot = Math.floor(maxShares / 100);
+            const totalInvestment = maxLot * 100 * entry;
+
+            document.getElementById('lotResult').innerHTML = `
+        <div class="text-xs text-slate-400">Rekomendasi Beli Aman:</div>
+        <div class="text-2xl font-black text-accentblue my-0.5">${maxLot.toLocaleString()} Lot</div>
+        <div class="text-[11px] text-slate-300">Estimasi Modal: <strong>Rp ${totalInvestment.toLocaleString()}</strong></div>
+        <div class="text-[10px] text-accentred mt-1">Maksimal Risiko Rugi (Jika hit SL): Rp ${maxRiskRupiah.toLocaleString()} (${riskPercent}%)</div>
+      `;
+        }
+
+        function closeModal() {
+            document.getElementById('detailModal').classList.add('hidden');
+        }
+
+        // Inisialisasi awal
+        filterData();
+    </script>
+</body>
+
+</html>
