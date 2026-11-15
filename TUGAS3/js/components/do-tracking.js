@@ -45,16 +45,19 @@ Vue.component('do-tracking', {
     executeSearch() {
       this.submittedQuery = this.searchQuery;
       if (this.searchResults.length === 0) {
-        alert(`Data tidak ditemukan untuk pencarian "${this.searchQuery}".`);
+        this.$emit('notify', `Data tidak ditemukan untuk pencarian "${this.searchQuery}".`, 'danger');
+      } else if (this.searchQuery.trim() !== '') {
+        this.$emit('notify', `Ditemukan ${this.searchResults.length} data pengiriman.`, 'success');
       }
     },
     clearSearch() {
       this.searchQuery = '';
       this.submittedQuery = '';
+      this.$emit('notify', 'Pencarian DO telah di-reset.', 'success');
     },
     addProgress(item) {
       if (!this.newKeterangan.trim()) {
-        alert('Validasi Gagal: Keterangan status perjalanan tidak boleh kosong!');
+        this.$emit('notify', 'Validasi Gagal: Keterangan status perjalanan tidak boleh kosong!', 'danger');
         return;
       }
 
@@ -71,7 +74,7 @@ Vue.component('do-tracking', {
         }
       });
 
-      alert(`Berhasil! Status perjalanan untuk ${item.nomorDO} telah ditambahkan.`);
+      this.$emit('notify', `Berhasil! Status perjalanan untuk ${item.nomorDO} telah ditambahkan.`, 'success');
       this.newKeterangan = '';
     }
   }

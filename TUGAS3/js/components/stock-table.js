@@ -101,16 +101,17 @@ Vue.component('ba-stock-table', {
       this.onlyReorder = false;
       this.sortBy = 'judul';
       this.watcherNotif = '';
+      this.$emit('notify', 'Seluruh filter dan pengurutan telah di-reset.', 'success');
     },
     addStock() {
       // Validasi JavaScript dengan pesan alert bahasa Indonesia
       const f = this.newItem;
       if (!f.kode.trim() || !f.judul.trim() || !f.kategori || !f.upbjj || !f.lokasiRak.trim()) {
-        alert('Validasi Gagal: Kode MK, Judul, Kategori, UT-Daerah, dan Lokasi Rak wajib diisi!');
+        this.$emit('notify', 'Validasi Gagal: Kode MK, Judul, Kategori, UT-Daerah, dan Lokasi Rak wajib diisi!', 'danger');
         return;
       }
       if (f.harga === '' || Number(f.harga) < 0 || f.qty === '' || Number(f.qty) < 0 || f.safety === '' || Number(f.safety) < 0) {
-        alert('Validasi Gagal: Harga, Jumlah Stok, dan Safety Stok harus berupa angka valid (minimal 0)!');
+        this.$emit('notify', 'Validasi Gagal: Harga, Jumlah Stok, dan Safety Stok harus berupa angka valid (minimal 0)!', 'danger');
         return;
       }
 
@@ -126,7 +127,7 @@ Vue.component('ba-stock-table', {
         catatanHTML: f.catatanHTML.trim() || '<em>Tidak ada catatan</em>'
       });
 
-      alert(`Berhasil! Bahan ajar "${f.judul}" telah ditambahkan ke daftar stok.`);
+      this.$emit('notify', `Berhasil! Bahan ajar "${f.judul}" telah ditambahkan ke daftar stok.`, 'success');
 
       // Reset form
       this.newItem = {
@@ -146,11 +147,11 @@ Vue.component('ba-stock-table', {
     },
     saveEdit() {
       if (!this.editItem.judul.trim() || !this.editItem.lokasiRak.trim()) {
-        alert('Validasi Gagal: Judul dan Lokasi Rak tidak boleh kosong!');
+        this.$emit('notify', 'Validasi Gagal: Judul dan Lokasi Rak tidak boleh kosong!', 'danger');
         return;
       }
       if (Number(this.editItem.qty) < 0 || Number(this.editItem.safety) < 0 || Number(this.editItem.harga) < 0) {
-        alert('Validasi Gagal: Harga, Stok, dan Safety Stok tidak boleh bernilai negatif!');
+        this.$emit('notify', 'Validasi Gagal: Harga, Stok, dan Safety Stok tidak boleh bernilai negatif!', 'danger');
         return;
       }
 
@@ -164,7 +165,7 @@ Vue.component('ba-stock-table', {
         }
       });
 
-      alert(`Berhasil! Data bahan ajar "${this.editItem.judul}" telah diperbarui.`);
+      this.$emit('notify', `Berhasil! Data bahan ajar "${this.editItem.judul}" telah diperbarui.`, 'success');
       this.cancelEdit();
     },
     confirmDelete(item) {

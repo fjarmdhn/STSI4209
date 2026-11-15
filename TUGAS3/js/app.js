@@ -1,8 +1,14 @@
 new Vue({
   el: '#app',
   data: {
-    tab: 'stok', // 'stok' | 'tracking' | 'order'
+    tab: 'stok',
     isLoading: true,
+    toast: {
+      show: false,
+      message: '',
+      type: 'success', // 'success' | 'danger'
+      timer: null
+    },
     state: {
       upbjjList: [],
       kategoriList: [],
@@ -18,6 +24,16 @@ new Vue({
     this.isLoading = false;
   },
   methods: {
+    showToast(message, type = 'success') {
+      if (this.toast.timer) clearTimeout(this.toast.timer);
+      this.toast.message = message;
+      this.toast.type = type;
+      this.toast.show = true;
+
+      this.toast.timer = setTimeout(() => {
+        this.toast.show = false;
+      }, 4000);
+    },
     handleAddStock(newItem) {
       this.state.stok.push(newItem);
     },
@@ -34,7 +50,7 @@ new Vue({
         () => {
           if (index !== -1) {
             this.state.stok.splice(index, 1);
-            alert(`Data bahan ajar "${judul}" berhasil dihapus.`);
+            this.showToast(`Data bahan ajar "${judul}" berhasil dihapus.`, 'success');
           }
         }
       );

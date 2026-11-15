@@ -48,19 +48,19 @@ Vue.component('order-form', {
     },
     submitOrder() {
       if (!this.nim.trim() || !this.nama.trim()) {
-        alert('Validasi Gagal: NIM dan Nama Mahasiswa wajib diisi!');
+        this.$emit('notify', 'Validasi Gagal: NIM dan Nama Mahasiswa wajib diisi!', 'danger');
         return;
       }
       if (!/^\d+$/.test(this.nim.trim())) {
-        alert('Validasi Gagal: NIM harus berupa angka!');
+        this.$emit('notify', 'Validasi Gagal: NIM harus berupa angka!', 'danger');
         return;
       }
       if (!this.selectedEkspedisi) {
-        alert('Validasi Gagal: Silakan pilih layanan Ekspedisi terlebih dahulu!');
+        this.$emit('notify', 'Validasi Gagal: Silakan pilih layanan Ekspedisi terlebih dahulu!', 'danger');
         return;
       }
       if (!this.selectedPaketObj) {
-        alert('Validasi Gagal: Silakan pilih Paket Bahan Ajar terlebih dahulu!');
+        this.$emit('notify', 'Validasi Gagal: Silakan pilih Paket Bahan Ajar terlebih dahulu!', 'danger');
         return;
       }
 
@@ -68,8 +68,9 @@ Vue.component('order-form', {
       const pad = n => String(n).padStart(2, '0');
       const timestamp = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
 
+      const nomorDibuat = this.autoNomorDO;
       const newDOEntry = {};
-      newDOEntry[this.autoNomorDO] = {
+      newDOEntry[nomorDibuat] = {
         nim: this.nim.trim(),
         nama: this.nama.trim(),
         status: 'Pesanan Dibuat',
@@ -86,7 +87,7 @@ Vue.component('order-form', {
       };
 
       this.$emit('created', newDOEntry);
-      alert(`Berhasil! Pesanan Delivery Order dengan nomor ${this.autoNomorDO} telah dibuat.`);
+      this.$emit('notify', `Berhasil! Pesanan Delivery Order dengan nomor ${nomorDibuat} telah dibuat.`, 'success');
 
       // Reset formulir
       this.nim = '';
