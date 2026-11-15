@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Stok Bahan Ajar - SITTA UT</title>
+    <link rel="stylesheet" href="css/style.css">
+    <!-- Vue.js 2 CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+</head>
+
+<body>
+    <nav class="navbar">
+        <h2>SITTA UT - Kelola Stok</h2>
+        <div>
+            <a href="index.html">Home</a>
+            <a href="stok.html">Stok Bahan Ajar</a>
+            <a href="tracking.html">Tracking DO</a>
+        </div>
+    </nav>
+
+    <div id="app" class="container">
+        <!-- Watcher Notice -->
+        <div v-if="pesanWatcher" class="alert-info" style="margin-bottom: 15px;">
+            ℹ️ <strong>Sistem Notice:</strong> {{ pesanWatcher }}
+        </div>
+
+        <!-- Form Tambah Data Stok -->
+        <div class="card">
+            <h3>➕ Form Tambah Bahan Ajar Baru</h3>
+            <form @submit.prevent="tambahStok">
+                <div class="grid-filter">
+                    <div class="form-group">
+                        <label>Kode Barang</label>
+                        <input type="text" v-model="formBaru.kode" placeholder="Misal: EKMA4210">
+                    </div>
+                    <div class="form-group">
+                        <label>Judul Mata Kuliah</label>
+                        <input type="text" v-model="formBaru.judul" placeholder="Judul Bahan Ajar">
+                    </div>
+                    <div class="form-group">
+                        <label>UPBJJ / UT-Daerah</label>
+                        <select v-model="formBaru.upbjj">
+                            <option value="">-- Pilih UPBJJ --</option>
+                            <option v-for="u in upbjjList" :key="u" :value="u">{{ u }}</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Kategori</label>
+                        <select v-model="formBaru.kategori">
+                            <option value="">-- Pilih Kategori --</option>
+                            <option v-for="k in kategoriList" :key="k" :value="k">{{ k }}</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Lokasi Rak</label>
+                        <input type="text" v-model="formBaru.lokasiRak" placeholder="Misal: R1-A5">
+                    </div>
+                    <div class="form-group">
+                        <label>Harga (Rp)</label>
+                        <input type="number" v-model.number="formBaru.harga" placeholder="0">
+                    </div>
+                    <div class="form-group">
+                        <label>Jumlah Stok (Qty)</label>
+                        <input type="number" v-model.number="formBaru.qty" placeholder="0">
+                    </div>
+                    <div class="form-group">
+                        <label>Safety Stock</label>
+                        <input type="number" v-model.number="formBaru.safety" placeholder="0">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Catatan (HTML Supported)</label>
+                    <input type="text" v-model="formBaru.catatanHTML" placeholder="Misal: <em>Edisi Baru</em>">
+                </div>
+                <button type="submit" class="btn btn-primary">Simpan Bahan Ajar</button>
+            </form>
+        </div>
+
+        <!-- Filter & Sort Panel -->
+        <div class="card">
+            <h3>🔍 Filter & Pengurutan Data Stok</h3>
+            <div class="grid-filter">
+                <!-- Filter UPBJJ -->
+                <div class="form-group">
+                    <label>Filter UT-Daerah (UPBJJ)</label>
+                    <select v-model="selectedUpbjj">
+                        <option value="">-- Semua UPBJJ --</option>
+                        <option v-for="u in upbjjList" :key="u" :value="u">{{ u }}</option>
+                    </select>
+                </div>
+
+                <!-- Dependent Option: Kategori Baru Muncul Setelah UPBJJ Dipilih -->
+                <div class="form-group" v-if="selectedUpbjj">
+                    <label>Filter Kategori Mata Kuliah</label>
+                    <select v-model="selectedKategori">
+                        <option value="">-- Semua Kategori --</option>
+                        <option v-for="k in kategoriList" :key="k" :value="k">{{ k }}</option>
+                    </select>
+                </div>
+
+                <!-- Filter Re-Order Status -->
+                <div class="form-group">
+                    <label>Filter Re-Order</label>
+                    <select v-model="filterReorder">
+                        <option value="all">Semua Stok</option>
+                        <option value="below_safety">Hanya Qty < Safety Stock</option>
+                        <option value="empty">Hanya Qty = 0 (Kosong)</option>
+                    </select>
+                </div>
+
+                <!-- Sort Option -->
+                <div class="form-group">
+                    <label>Urutkan Berdasarkan (Sort)</label>
+                    <select v-model="sortBy">
+                        <option value="judul">Judul Mata Kuliah</option>
+                        <option value="qty">Jumlah Stok (Qty)</option>
+                        <option value="harga">Harga Bahan Ajar</option>
+                    </select>
+                </div>
+            </div>
+            <button @click="resetFilter" class="btn btn-secondary">Reset Filter & Sort</button>
+        </div>
+
+        <!-- Table List Rendering -->
+        <div class="card">
+            <h3>📋 Daftar Stok Bahan Ajar (Total: {{ stokFilteredAndSorted.length }} Item)</h3>
+
+            <table class="table-custom">
+                <thead>
+                    <tr>
+                        <th>Kode / Judul</th>
+                        <th>UPBJJ & Kategori</th>
+                        <th>Rak</th>
+                        <th>Harga</th>
+                        <th>Stok / Safety</th>
+                        <th>Status Stok</th>
+                        <th>Catatan</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-if="stokFilteredAndSorted.length === 0">
+                        <td colspan="8" style="text-align: center; color: #a0aec0;">Tidak ada data bahan ajar yang
+                            sesuai dengan filter.</td>
+                    </tr>
+                    <tr v-for="(item, index) in stokFilteredAndSorted" :key="item.kode">
+                        <td>
+                            <strong>{{ item.kode }}</strong><br>
+                            <span v-text="item.judul"></span>
+                        </td>
+                        <td>
+                            <span>{{ item.upbjj }}</span><br>
+                            <small style="color: #718096;">{{ item.kategori }}</small>
+                        </td>
+                        <td>{{ item.lokasiRak }}</td>
+                        <td>Rp {{ item.harga.toLocaleString('id-ID') }}</td>
+                        <td>
+                            <template v-if="editIndex !== index">
+                                <strong>{{ item.qty }}</strong> / {{ item.safety }}
+                            </template>
+                            <template v-else>
+                                <input type="number" v-model.number="item.qty" style="width: 60px; padding: 4px;"> / {{
+                                item.safety }}
+                            </template>
+                        </td>
+                        <td>
+                            <!-- Conditional Rendering Status Stok -->
+                            <span v-if="item.qty >= item.safety" class="badge badge-success">🟢 Aman</span>
+                            <span v-else-if="item.qty < item.safety && item.qty > 0" class="badge badge-warning">⚠️
+                                Menipis</span>
+                            <span v-else-if="item.qty === 0" class="badge badge-danger">🔴 Kosong</span>
+                        </td>
+                        <td>
+                            <!-- Directive v-html untuk render HTML di Catatan -->
+                            <span v-html="item.catatanHTML"></span>
+                        </td>
+                        <td>
+                            <button v-if="editIndex !== index" @click="editIndex = index" class="btn btn-warning"
+                                style="padding: 4px 8px; font-size: 12px;">Edit</button>
+                            <button v-else @click="editIndex = null" class="btn btn-primary"
+                                style="padding: 4px 8px; font-size: 12px;">Selesai</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="js/stok-app.js"></script>
+</body>
+
+</html>

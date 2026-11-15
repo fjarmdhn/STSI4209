@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Tracking DO - SITTA UT</title>
+    <link rel="stylesheet" href="css/style.css">
+    <!-- Vue.js 2 CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+</head>
+
+<body>
+    <nav class="navbar">
+        <h2>SITTA UT - Tracking Delivery Order</h2>
+        <div>
+            <a href="index.html">Home</a>
+            <a href="stok.html">Stok Bahan Ajar</a>
+            <a href="tracking.html">Tracking DO</a>
+        </div>
+    </nav>
+
+    <div id="app" class="container">
+        <!-- Watcher Notice -->
+        <div v-if="pesanWatcher" class="alert-info" style="margin-bottom: 15px;">
+            ℹ️ <strong>Sistem Notice:</strong> {{ pesanWatcher }}
+        </div>
+
+        <!-- Form Input DO Baru -->
+        <div class="card">
+            <h3>🚚 Input Transaksi Delivery Order (DO) Baru</h3>
+            <form @submit.prevent="tambahDO">
+                <div class="grid-filter">
+                    <div class="form-group">
+                        <label>Nomor DO (Auto Generated)</label>
+                        <input type="text" :value="generatedNomorDO" disabled
+                            style="background-color: #edf2f7; font-weight: bold; color: #2b6cb0;">
+                    </div>
+                    <div class="form-group">
+                        <label>NIM Mahasiswa</label>
+                        <input type="text" v-model="formDO.nim" placeholder="Masukkan NIM">
+                    </div>
+                    <div class="form-group">
+                        <label>Nama Mahasiswa</label>
+                        <input type="text" v-model="formDO.nama" placeholder="Nama Lengkap">
+                    </div>
+                    <div class="form-group">
+                        <label>Opsi Ekspedisi</label>
+                        <select v-model="formDO.ekspedisi">
+                            <option value="">-- Pilih Ekspedisi --</option>
+                            <option v-for="p in pengirimanList" :key="p.kode" :value="p.nama">{{ p.nama }}</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Paket Bahan Ajar</label>
+                        <select v-model="selectedPaketKode">
+                            <option value="">-- Pilih Paket Bahan Ajar --</option>
+                            <option v-for="pkt in paket" :key="pkt.kode" :value="pkt.kode">
+                                {{ pkt.kode }} - {{ pkt.nama }}
+                            </option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Tanggal Kirim</label>
+                        <input type="date" v-model="formDO.tanggalKirim">
+                    </div>
+                </div>
+
+                <!-- Detail Paket yang Dipilih -->
+                <div v-if="selectedPaketObj" class="alert-info" style="margin-bottom: 15px;">
+                    <strong>Detail Paket Dipilih:</strong><br>
+                    • Nama Paket: {{ selectedPaketObj.nama }}<br>
+                    • Daftar Isi Modul: {{ selectedPaketObj.isi.join(', ') }}<br>
+                    • Total Harga Paket: <strong>Rp {{ selectedPaketObj.harga.toLocaleString('id-ID') }}</strong>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Simpan Transaction DO</button>
+            </form>
+        </div>
+
+        <!-- Pencarian & Detail Tracking -->
+        <div class="card">
+            <h3>🔍 Cari Tracking Delivery Order</h3>
+            <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                <input type="text" v-model="searchDONomor" placeholder="Masukkan Nomor DO (misal: DO2025-0001)"
+                    style="flex: 1; padding: 10px; border-radius: 6px; border: 1px solid #cbd5e0;">
+                <button @click="cariTracking" class="btn btn-primary">Cari Tracking</button>
+            </div>
+
+            <!-- Hasil Search Tracking -->
+            <div v-if="detailTracking"
+                style="background: #f7fafc; padding: 20px; border-radius: 8px; border: 1px solid #e2e8f0;">
+                <h4 style="color: #2b6cb0; margin-bottom: 10px;">Detail Status DO: {{ activeDONomor }}</h4>
+                <p><strong>NIM / Nama:</strong> {{ detailTracking.nim }} - {{ detailTracking.nama }}</p>
+                <p><strong>Ekspedisi:</strong> {{ detailTracking.ekspedisi }}</p>
+                <p><strong>Tanggal Kirim:</strong> {{ detailTracking.tanggalKirim }}</p>
+                <p><strong>Paket ID:</strong> {{ detailTracking.paket }}</p>
+                <p><strong>Total Pembayaran:</strong> Rp {{ detailTracking.total.toLocaleString('id-ID') }}</p>
+                <p><strong>Status:</strong> <span class="badge badge-success">{{ detailTracking.status }}</span></p>
+
+                <h5 style="margin-top: 15px; margin-bottom: 8px;">Riwayat Perjalanan Paket:</h5>
+                <ul style="margin-left: 20px; font-size: 13px; color: #4a5568;">
+                    <li v-for="(p, idx) in detailTracking.perjalanan" :key="idx">
+                        [{{ p.waktu }}] - {{ p.keterangan }}
+                    </li>
+                </ul>
+            </div>
+            <div v-else-if="searched && !detailTracking" class="alert-info" style="border-left-color: #e53e3e;">
+                ⚠️ Nomor Delivery Order tidak ditemukan dalam sistem.
+            </div>
+        </div>
+    </div>
+
+    <script src="js/tracking-app.js"></script>
+</body>
+
+</html>
