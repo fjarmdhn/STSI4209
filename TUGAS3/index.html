@@ -10,13 +10,18 @@
 
 <body>
     <div id="app">
-        <!-- Navigasi Utama (Tab Routing) -->
+        <!-- Toast Notification -->
         <div v-if="toast.show" class="custom-toast" :class="'toast-' + toast.type">
             <span>{{ toast.message }}</span>
             <button class="toast-close" @click="toast.show = false">&times;</button>
         </div>
+
+        <!-- Navbar Utama -->
         <nav class="navbar">
-            <h1>📚 SITTA UT — Aplikasi Bahan Ajar (Vue.js)</h1>
+            <div class="navbar-brand">
+                <img src="assets/img/Logo_Universitas_Terbuka.svg" alt="Logo UT" class="logo-nav">
+                <h1>SITTA UT — Aplikasi Bahan Ajar</h1>
+            </div>
             <div class="nav-tabs">
                 <button :class="{ active: tab === 'stok' }" @click="tab = 'stok'">
                     📦 Stok Bahan Ajar
@@ -30,6 +35,7 @@
             </div>
         </nav>
 
+        <!-- Konten Utama Berdasarkan Tab -->
         <div class="container">
             <div v-if="isLoading" class="card">
                 <p>Memuat data bahan ajar dari JSON...</p>
@@ -46,8 +52,8 @@
 
                 <!-- Tab 2: Pemesanan DO Baru -->
                 <section v-show="tab === 'order'">
-                    <order-form :paket="state.paket" :ekspedisi="state.pengirimanList" :tracking-count="state.tracking.length"
-                        @created="handleNewDO" @notify="showToast">
+                    <order-form :paket="state.paket" :ekspedisi="state.pengirimanList"
+                        :tracking-count="state.tracking.length" @created="handleNewDO" @notify="showToast">
                     </order-form>
                 </section>
 
@@ -407,3 +413,4 @@
 </body>
 
 </html>
+

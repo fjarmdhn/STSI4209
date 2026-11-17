@@ -20,16 +20,39 @@ body {
     justify-content: space-between;
     align-items: center;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+/* Kontainer Brand (Logo & Judul) */
+.navbar-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+/* Ukuran Logo di Navbar */
+.logo-nav {
+    height: 38px;
+    width: auto;
+    object-fit: contain;
+    background: #ffffff;
+    /* Bingkai putih agar logo terlihat kontras jika transparan */
+    padding: 3px 6px;
+    border-radius: 4px;
 }
 
 .navbar h1 {
     font-size: 1.25rem;
     letter-spacing: 0.5px;
+    color: #ffffff;
 }
 
+/* Tab Navigasi */
 .nav-tabs {
     display: flex;
     gap: 10px;
+    flex-wrap: wrap;
 }
 
 .nav-tabs button {
