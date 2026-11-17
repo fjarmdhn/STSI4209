@@ -145,36 +145,84 @@
                             sesuai dengan filter.</td>
                     </tr>
                     <tr v-for="(item, index) in stokFilteredAndSorted" :key="item.kode">
+                        <!-- Kolom Kode & Judul -->
                         <td>
-                            <strong>{{ item.kode }}</strong><br>
-                            <span v-text="item.judul"></span>
+                            <template v-if="editIndex !== index">
+                                <strong>{{ item.kode }}</strong><br>
+                                <span v-text="item.judul"></span>
+                            </template>
+                            <template v-else>
+                                <input type="text" v-model="item.kode" style="width: 100%; margin-bottom: 4px; padding: 4px;"
+                                    placeholder="Kode">
+                                <input type="text" v-model="item.judul" style="width: 100%; padding: 4px;" placeholder="Judul">
+                            </template>
                         </td>
+
+                        <!-- Kolom UPBJJ & Kategori -->
                         <td>
-                            <span>{{ item.upbjj }}</span><br>
-                            <small style="color: #718096;">{{ item.kategori }}</small>
+                            <template v-if="editIndex !== index">
+                                <span>{{ item.upbjj }}</span><br>
+                                <small style="color: #718096;">{{ item.kategori }}</small>
+                            </template>
+                            <template v-else>
+                                <select v-model="item.upbjj" style="width: 100%; margin-bottom: 4px; padding: 4px;">
+                                    <option v-for="u in upbjjList" :key="u" :value="u">{{ u }}</option>
+                                </select>
+                                <select v-model="item.kategori" style="width: 100%; padding: 4px;">
+                                    <option v-for="k in kategoriList" :key="k" :value="k">{{ k }}</option>
+                                </select>
+                            </template>
                         </td>
-                        <td>{{ item.lokasiRak }}</td>
-                        <td>Rp {{ item.harga.toLocaleString('id-ID') }}</td>
+
+                        <!-- Kolom Rak -->
+                        <td>
+                            <template v-if="editIndex !== index">
+                                {{ item.lokasiRak }}
+                            </template>
+                            <template v-else>
+                                <input type="text" v-model="item.lokasiRak" style="width: 80px; padding: 4px;">
+                            </template>
+                        </td>
+
+                        <!-- Kolom Harga -->
+                        <td>
+                            <template v-if="editIndex !== index">
+                                Rp {{ item.harga.toLocaleString('id-ID') }}
+                            </template>
+                            <template v-else>
+                                <input type="number" v-model.number="item.harga" style="width: 90px; padding: 4px;">
+                            </template>
+                        </td>
+
+                        <!-- Kolom Stok / Safety -->
                         <td>
                             <template v-if="editIndex !== index">
                                 <strong>{{ item.qty }}</strong> / {{ item.safety }}
                             </template>
                             <template v-else>
-                                <input type="number" v-model.number="item.qty" style="width: 60px; padding: 4px;"> / {{
-                                item.safety }}
+                                <input type="number" v-model.number="item.qty" style="width: 50px; padding: 4px;" placeholder="Qty"> /
+                                <input type="number" v-model.number="item.safety" style="width: 50px; padding: 4px;" placeholder="Safety">
                             </template>
                         </td>
+
+                        <!-- Status Stok -->
                         <td>
-                            <!-- Conditional Rendering Status Stok -->
                             <span v-if="item.qty >= item.safety" class="badge badge-success">🟢 Aman</span>
-                            <span v-else-if="item.qty < item.safety && item.qty > 0" class="badge badge-warning">⚠️
-                                Menipis</span>
+                            <span v-else-if="item.qty < item.safety && item.qty > 0" class="badge badge-warning">⚠️ Menipis</span>
                             <span v-else-if="item.qty === 0" class="badge badge-danger">🔴 Kosong</span>
                         </td>
+
+                        <!-- Catatan -->
                         <td>
-                            <!-- Directive v-html untuk render HTML di Catatan -->
-                            <span v-html="item.catatanHTML"></span>
+                            <template v-if="editIndex !== index">
+                                <span v-html="item.catatanHTML"></span>
+                            </template>
+                            <template v-else>
+                                <input type="text" v-model="item.catatanHTML" style="width: 100%; padding: 4px;" placeholder="Catatan HTML">
+                            </template>
                         </td>
+
+                        <!-- Tombol Aksi -->
                         <td>
                             <button v-if="editIndex !== index" @click="editIndex = index" class="btn btn-warning"
                                 style="padding: 4px 8px; font-size: 12px;">Edit</button>

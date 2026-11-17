@@ -122,15 +122,11 @@ new Vue({
   },
 
   computed: {
-    // Optimized Filtering and Sorting tanpa recompute berlebih
     stokFilteredAndSorted() {
       let result = this.stok.filter((item) => {
-        // Filter UPBJJ
         if (this.selectedUpbjj && item.upbjj !== this.selectedUpbjj) return false;
-        // Filter Kategori (Dependent Options)
         if (this.selectedUpbjj && this.selectedKategori && item.kategori !== this.selectedKategori) return false;
 
-        // Filter Reorder Status
         if (this.filterReorder === "below_safety") {
           return item.qty < item.safety;
         } else if (this.filterReorder === "empty") {
@@ -139,7 +135,6 @@ new Vue({
         return true;
       });
 
-      // Sorting Logic
       return result.sort((a, b) => {
         if (this.sortBy === "judul") {
           return a.judul.localeCompare(b.judul);
@@ -154,7 +149,6 @@ new Vue({
   },
 
   watch: {
-    // Watcher 1: Memantau perubahan filter UPBJJ
     selectedUpbjj(newVal) {
       if (!newVal) {
         this.selectedKategori = "";
@@ -163,7 +157,6 @@ new Vue({
         this.pesanWatcher = `Filter diterapkan untuk UPBJJ ${newVal}. Kategori sekarang aktif.`;
       }
     },
-    // Watcher 2: Memantau jumlah total stok pada array
     stok: {
       handler(newStok) {
         const itemKosong = newStok.filter((i) => i.qty === 0).length;
@@ -185,7 +178,6 @@ new Vue({
     },
 
     tambahStok() {
-      // Validasi Input Sederhana
       if (!this.formBaru.kode || !this.formBaru.judul || !this.formBaru.upbjj) {
         showAppAlert("Mohon lengkapi Kode, Judul, dan UPBJJ terlebih dahulu!", "error");
         return;
@@ -197,7 +189,6 @@ new Vue({
 
       this.stok.push({ ...this.formBaru });
 
-      // Reset Form
       this.formBaru = {
         kode: "",
         judul: "",
